@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import supabase from "@/lib/db";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -47,9 +48,11 @@ export default function Home() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full font-bold" size={"lg"}>
-                Detail Menu
-              </Button>
+              <Link href={`/menu/${menu.id}`} className="w-full">
+                <Button className="w-full font-bold cursor-pointer" size={"lg"}>
+                  Detail Menu
+                </Button>
+              </Link>
             </CardFooter>
           </Card>
         ))}
