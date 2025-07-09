@@ -49,6 +49,10 @@ import { toast } from "sonner";
 const Page = ({}) => {
   const [menus, setMenus] = useState<IMenu[]>([]);
   const [createDialog, setCreateDialog] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState<{
+    menu: IMenu;
+    action: "edit" | "delete";
+  } | null>(null);
 
   useEffect(() => {
     const fecthMenus = async () => {
@@ -83,6 +87,30 @@ const Page = ({}) => {
         }
         toast("Menu added successfully!");
         setCreateDialog(false);
+      }
+    } catch (error) {
+      console.error("Unexpected error: ", error);
+      toast.error("Failed to add menu. Please try again.");
+    }
+  };
+
+  const handleDeleteMenu = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("menus")
+        .delete()
+        .eq("id", selectedMenu?.menu.id);
+
+      if (error) {
+        console.error("Error deleting menu: ", error);
+      } else {
+        if (data) {
+          setMenus((prev) =>
+            prev.filter((menu) => menu.id !== selectedMenu?.menu.id)
+          );
+        }
+        toast("Menu Deleted successfully!");
+        setSelectedMenu(null);
       }
     } catch (error) {
       console.error("Unexpected error: ", error);
@@ -220,8 +248,15 @@ const Page = ({}) => {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-400">
+                        <DropdownMenuItem className="cursor-pointer">
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setSelectedMenu({ menu, action: "delete" })
+                          }
+                          className="text-red-400 cursor-pointer"
+                        >
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -233,6 +268,38 @@ const Page = ({}) => {
           </TableBody>
         </Table>
       </div>
+      <Dialog
+        open={selectedMenu !== null && selectedMenu.action === "delete"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedMenu(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delte Menu</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedMenu?.menu.name}?
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant={"secondary"} className="cursor-pointer">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleDeleteMenu}
+              variant={"destructive"}
+              className="cursor-pointer"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
