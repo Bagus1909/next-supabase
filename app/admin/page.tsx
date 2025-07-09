@@ -79,7 +79,7 @@ const Page = ({}) => {
         console.error("Error adding menu: ", error);
       } else {
         if (data) {
-          setMenus((prev) => [...data, ...prev]);
+          setMenus((prev) => [...prev, ...data]);
         }
         toast("Menu added successfully!");
         setCreateDialog(false);
